@@ -1,98 +1,88 @@
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-const predefined = ["Lenovo Office laptop", "Office Laptop Charger", "Mouse & Dongle", "Airtel Roter", "Realme earbuds" , "Redmi Phone" , "Portronics Magclick" , "Lenskart Pouch" , "Diary & Pen" , "Wallet" , "Pouch - Weired Headphone, USB Type B, Type C Cable" , "iPhone Charger" , "Office icard" , "Umbrella"];
+const taskInput = document.getElementById('taskInput');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const addPredefinedBtn = document.getElementById('addPredefinedBtn');
+const completeAllBtn = document.getElementById('completeAllBtn');
+const deleteAllBtn = document.getElementById('deleteAllBtn');
+const toggleModeBtn = document.getElementById('toggleModeBtn');
+const taskList = document.getElementById('taskList');
 
-function renderTasks() {
-  const taskList = document.getElementById("taskList");
-  taskList.innerHTML = "";
-  tasks.forEach((task, i) => {
-    const li = document.createElement("li");
-    if (task.done) li.classList.add("completed");
+let isDarkMode = false;
 
-    const toggle = document.createElement("label");
-    toggle.className = "toggle-container";
-    const toggleInput = document.createElement("input");
-    toggleInput.type = "checkbox";
-    toggleInput.checked = task.done;
-    toggleInput.onchange = () => toggleTask(i);
-    const toggleSlider = document.createElement("span");
-    toggleSlider.className = "toggle-slider";
-    toggle.append(toggleInput, toggleSlider);
+function createTaskElement(text) {
+  const li = document.createElement('li');
 
-    const span = document.createElement("span");
-    span.textContent = task.text;
+  const leftDiv = document.createElement('div');
+  leftDiv.className = 'task-left';
 
-    const controls = document.createElement("div");
-    controls.className = "task-controls";
+  // Toggle switch
+  const switchLabel = document.createElement('label');
+  switchLabel.className = 'switch';
+  const toggle = document.createElement('input');
+  toggle.type = 'checkbox';
+  const slider = document.createElement('span');
+  slider.className = 'slider';
+  switchLabel.appendChild(toggle);
+  switchLabel.appendChild(slider);
 
-    const edit = document.createElement("button");
-    edit.className = "edit";
-    edit.textContent = "Edit";
-    edit.onclick = () => editTask(i);
+  const span = document.createElement('span');
+  span.textContent = text;
 
-    const del = document.createElement("button");
-    del.className = "delete";
-    del.textContent = "Delete";
-    del.onclick = () => deleteTask(i);
-
-    controls.append(edit, del);
-
-    li.append(toggle, span, controls);
-    taskList.appendChild(li);
+  toggle.addEventListener('change', () => {
+    if (toggle.checked) span.classList.add('completed');
+    else span.classList.remove('completed');
   });
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  leftDiv.appendChild(switchLabel);
+  leftDiv.appendChild(span);
+
+  const buttonsDiv = document.createElement('div');
+  buttonsDiv.className = 'task-buttons';
+
+  const editBtn = document.createElement('button');
+  editBtn.innerHTML = '✏️';
+  editBtn.onclick = () => {
+    const newTask = prompt('Edit task:', span.textContent);
+    if (newTask !== null) span.textContent = newTask;
+  };
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.innerHTML = '🗑️';
+  deleteBtn.onclick = () => taskList.removeChild(li);
+
+  buttonsDiv.appendChild(editBtn);
+  buttonsDiv.appendChild(deleteBtn);
+
+  li.appendChild(leftDiv);
+  li.appendChild(buttonsDiv);
+
+  taskList.appendChild(li);
 }
 
-function addTask() {
-  const input = document.getElementById("taskInput");
-  const text = input.value.trim();
-  if (text) {
-    tasks.push({ text, done: false });
-    input.value = "";
-    renderTasks();
+addTaskBtn.addEventListener('click', () => {
+  const task = taskInput.value.trim();
+  if (task) {
+    createTaskElement(task);
+    taskInput.value = '';
   }
-}
+});
 
-function addPredefinedTasks() {
-  predefined.forEach(t => tasks.push({ text: t, done: false }));
-  renderTasks();
-}
+addPredefinedBtn.addEventListener('click', () => {
+  ['Lenovo Office laptop', 'Office Laptop Charger', 'Mouse & Dongle', 'Airtel Roter', 'Realme earbuds' , 'Redmi Phone' , 'Portronics Magclick' , 'Lenskart Pouch' , 'Diary & Pen' , 'Wallet' , 'Pouch - Headphone, Type B/C Cable' , 'iPhone Charger' , 'Office icard' , 'Umbrella'].forEach(createTaskElement);
+});
 
-function completeAllTasks() {
-  tasks.forEach(t => t.done = true);
-  renderTasks();
-}
+completeAllBtn.addEventListener('click', () => {
+  document.querySelectorAll('#taskList input[type="checkbox"]').forEach(checkbox => {
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event('change'));
+  });
+});
 
-function deleteAllTasks() {
-  tasks = [];
-  renderTasks();
-}
+deleteAllBtn.addEventListener('click', () => {
+  taskList.innerHTML = '';
+});
 
-function toggleTask(i) {
-  tasks[i].done = !tasks[i].done;
-  renderTasks();
-}
-
-function editTask(i) {
-  const newText = prompt("Edit task:", tasks[i].text);
-  if (newText !== null && newText.trim()) {
-    tasks[i].text = newText.trim();
-    renderTasks();
-  }
-}
-
-function deleteTask(i) {
-  tasks.splice(i, 1);
-  renderTasks();
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark"));
-}
-
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark");
-  document.getElementById("darkToggle").checked = true;
-}
-
-renderTasks();
+toggleModeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  isDarkMode = !isDarkMode;
+  toggleModeBtn.textContent = isDarkMode ? '☀' : '🌙';
+});
