@@ -3,15 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checklist App</title>
+  <title>Cloud Checklist</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>Checklist</h1>
-      <button id="toggleModeBtn">🌙</button>
+      <div class="header-controls">
+        <button id="clipboardBtn" title="Open Clipboard">📋</button>
+        <button id="syncBtn" title="Sync / Refresh">🔄</button>
+        <button id="cloudBtn" title="Sync Settings">☁️</button>
+        <button id="toggleModeBtn">🌙</button>
+      </div>
     </div>
+
+    <div class="status-container">
+      <div id="statusPill" class="status-pill">
+        <div class="status-dot"></div>
+        <span id="statusText" class="status-text">DRIVE SYNCED</span>
+      </div>
+    </div>
+
     <div class="controls">
       <input type="text" id="taskInput" placeholder="Enter new task" />
       <button id="addTaskBtn">Add Task</button>
@@ -21,6 +34,31 @@
     </div>
     <ul id="taskList"></ul>
   </div>
+
+  <div id="clipboardModal" class="modal hidden">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h2>Clipboard</h2>
+        <button id="closeClipboardBtn" class="close-icon">&times;</button>
+      </div>
+      <textarea id="clipboardText" placeholder="Drop text here or type notes..."></textarea>
+      <p class="hint">Text is auto-saved & synced.</p>
+    </div>
+  </div>
+
+  <div id="cloudModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Google Drive Sync</h2>
+      <p>Paste your Web App URL below:</p>
+      <input type="text" id="cloudUrlInput" placeholder="https://script.google.com/.../exec" />
+      <div class="modal-buttons">
+        <button id="cancelCloudBtn">Cancel</button>
+        <button id="saveCloudBtn" class="blue">Connect</button>
+      </div>
+      <button id="disconnectBtn" class="text-red">Disconnect</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
