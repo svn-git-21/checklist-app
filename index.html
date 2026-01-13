@@ -23,14 +23,21 @@
         <div class="status-dot"></div>
         <span id="statusText" class="status-text">DRIVE SYNCED</span>
       </div>
+      <div id="clock" class="clock">00:00</div>
     </div>
 
     <div class="controls">
-      <input type="text" id="taskInput" placeholder="Enter new task" />
-      <button id="addTaskBtn">Add Task</button>
+      <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Enter new task" />
+        <button id="addTaskBtn" class="plus-btn" title="Add Task">+</button>
+      </div>
+
       <button id="addPredefinedBtn" class="blue">Add Predefined Tasks</button>
-      <button id="completeAllBtn" class="green">Complete All</button>
-      <button id="deleteAllBtn" class="red">Delete All</button>
+      
+      <div class="row-buttons">
+        <button id="completeAllBtn" class="green">Complete All</button>
+        <button id="deleteAllBtn" class="red">Delete All</button>
+      </div>
     </div>
     <ul id="taskList"></ul>
   </div>
@@ -42,6 +49,12 @@
         <button id="closeClipboardBtn" class="close-icon">&times;</button>
       </div>
       <textarea id="clipboardText" placeholder="Drop text here or type notes..."></textarea>
+      
+      <div class="modal-buttons" style="margin-top: 15px;">
+        <button id="copyClipboardBtn" class="blue">Copy</button>
+        <button id="closeClipboardFooterBtn">Close</button>
+      </div>
+      
       <p class="hint">Text is auto-saved & synced.</p>
     </div>
   </div>
