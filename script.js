@@ -21,11 +21,16 @@ const clipboardBtn = document.getElementById('clipboardBtn');
 const clipboardModal = document.getElementById('clipboardModal');
 const clipboardText = document.getElementById('clipboardText');
 const closeClipboardBtn = document.getElementById('closeClipboardBtn');
+const copyClipboardBtn = document.getElementById('copyClipboardBtn');
+const closeClipboardFooterBtn = document.getElementById('closeClipboardFooterBtn');
 
 // Status Elements
 const statusPill = document.getElementById('statusPill');
 const statusDot = statusPill.querySelector('.status-dot');
 const statusText = document.getElementById('statusText');
+
+// Clock Element
+const clockElement = document.getElementById('clock');
 
 // --- INIT ---
 function init() {
@@ -33,6 +38,19 @@ function init() {
   renderTasks();
   clipboardText.value = AppData.clipboard; 
   if (AppData.cloudUrl) pullFromCloud();
+  
+  // Start Clock
+  setInterval(updateClock, 1000); // Update every second to stay accurate
+  updateClock();
+}
+
+// --- CLOCK FUNCTION (Updated) ---
+function updateClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  // Removed seconds to match the requested image style
+  clockElement.textContent = `${hours}:${minutes}`;
 }
 
 // --- CORE FUNCTIONS ---
@@ -47,6 +65,11 @@ function saveData() {
     clearTimeout(window.syncTimeout);
     window.syncTimeout = setTimeout(pushToCloud, 2000);
   }
+}
+
+// Helper to save ONLY theme locally without triggering sync
+function saveThemeOnly() {
+  localStorage.setItem('checklist_theme', JSON.stringify(AppData.isDarkMode));
 }
 
 function renderTasks() {
@@ -144,7 +167,7 @@ document.getElementById('deleteAllBtn').addEventListener('click', () => {
 toggleModeBtn.addEventListener('click', () => {
   AppData.isDarkMode = !AppData.isDarkMode;
   applyTheme();
-  saveData();
+  saveThemeOnly();
 });
 
 // Manual Sync (Pull)
@@ -163,6 +186,22 @@ clipboardBtn.onclick = () => {
   clipboardText.focus();
 };
 closeClipboardBtn.onclick = () => clipboardModal.classList.add('hidden');
+closeClipboardFooterBtn.onclick = () => clipboardModal.classList.add('hidden');
+
+copyClipboardBtn.onclick = () => {
+  const text = clipboardText.value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = copyClipboardBtn.textContent;
+    copyClipboardBtn.textContent = 'Copied!';
+    setTimeout(() => {
+        copyClipboardBtn.textContent = originalText;
+    }, 1500);
+  }).catch(err => {
+    console.error('Failed to copy', err);
+    alert('Copy failed. Please copy manually.');
+  });
+};
 
 clipboardText.addEventListener('input', () => {
   AppData.clipboard = clipboardText.value;
@@ -180,7 +219,6 @@ async function pushToCloud() {
   try {
     const payload = JSON.stringify({ 
       tasks: AppData.tasks, 
-      theme: AppData.isDarkMode,
       clipboard: AppData.clipboard 
     });
     const res = await fetch(AppData.cloudUrl, { method: 'POST', body: payload });
@@ -200,7 +238,6 @@ async function pullFromCloud() {
     const data = await res.json();
     if (data.tasks) {
       AppData.tasks = data.tasks;
-      if (data.theme !== undefined) AppData.isDarkMode = data.theme;
       if (data.clipboard !== undefined) {
         AppData.clipboard = data.clipboard;
         clipboardText.value = AppData.clipboard;
@@ -225,8 +262,6 @@ function showSyncStatus(type) {
     statusDot.className = 'status-dot';
     statusText.textContent = 'DRIVE SYNCED';
     statusText.style.color = '#64748b';
-    
-    // REMOVED TIMEOUT: Badge will now stay visible forever
   } else {
     statusDot.className = 'status-dot';
     statusDot.style.backgroundColor = '#ef4444';
