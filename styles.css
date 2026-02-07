@@ -34,11 +34,10 @@ body.dark {
   gap: 10px;
 }
 
-/* Header Buttons */
-#toggleModeBtn, #cloudBtn, #clipboardBtn, #syncBtn {
+#toggleModeBtn, #cloudBtn, #clipboardBtn, #uploadBtn, #downloadBtn {
   border: none;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   width: 35px;
   height: 35px;
   cursor: pointer;
@@ -51,13 +50,14 @@ body.dark {
 #toggleModeBtn { background-color: #8af16a; color: white; }
 #cloudBtn { background-color: #007bff; color: white; }
 #clipboardBtn { background-color: #f59e0b; color: white; }
-#syncBtn { background-color: #8b5cf6; color: white; }
+#uploadBtn { background-color: #8b5cf6; color: white; }
+#downloadBtn { background-color: #06b6d4; color: white; }
 
-#toggleModeBtn:hover, #cloudBtn:hover, #clipboardBtn:hover, #syncBtn:hover { transform: scale(1.1); }
+#toggleModeBtn:hover, #cloudBtn:hover, #clipboardBtn:hover, #uploadBtn:hover, #downloadBtn:hover { 
+  transform: scale(1.1); 
+}
 
-/* --- STATUS PILL & CLOCK --- */
 .status-container {
-  /* Removed fixed height so it adapts to the large clock */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -103,19 +103,16 @@ body.dark {
   0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; }
 }
 
-/* UPDATED: Clock Styles to match your image */
 .clock {
   font-family: sans-serif;
-  font-size: 2.5rem; /* Larger size */
-  font-weight: 400;  /* Normal weight, not bold */
+  font-size: 2.5rem;
+  font-weight: 400;
   color: #333;
   line-height: 1;
 }
 body.dark .clock {
-  color: #e2e8f0; /* Light gray text for dark mode */
+  color: #e2e8f0;
 }
-
-/* ---------------- */
 
 .controls {
   display: flex;
@@ -243,7 +240,6 @@ input:checked + .slider:before { transform: translateX(18px); }
 
 .task-buttons button { margin-left: 0.3rem; background: none; border: none; color: inherit; font-size: 1.2rem; }
 
-/* Modal Styles */
 .modal {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
