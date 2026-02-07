@@ -10,26 +10,19 @@ const AppData = {
 const taskInput = document.getElementById('taskInput');
 const taskList = document.getElementById('taskList');
 const toggleModeBtn = document.getElementById('toggleModeBtn');
-
-// Cloud Elements
 const cloudBtn = document.getElementById('cloudBtn');
 const cloudModal = document.getElementById('cloudModal');
-const syncBtn = document.getElementById('syncBtn');
-
-// Clipboard Elements
+const uploadBtn = document.getElementById('uploadBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 const clipboardBtn = document.getElementById('clipboardBtn');
 const clipboardModal = document.getElementById('clipboardModal');
 const clipboardText = document.getElementById('clipboardText');
 const closeClipboardBtn = document.getElementById('closeClipboardBtn');
 const copyClipboardBtn = document.getElementById('copyClipboardBtn');
 const closeClipboardFooterBtn = document.getElementById('closeClipboardFooterBtn');
-
-// Status Elements
 const statusPill = document.getElementById('statusPill');
 const statusDot = statusPill.querySelector('.status-dot');
 const statusText = document.getElementById('statusText');
-
-// Clock Element
 const clockElement = document.getElementById('clock');
 
 // --- INIT ---
@@ -37,37 +30,27 @@ function init() {
   applyTheme();
   renderTasks();
   clipboardText.value = AppData.clipboard; 
-  if (AppData.cloudUrl) pullFromCloud();
   
-  // Start Clock
-  setInterval(updateClock, 1000); // Update every second to stay accurate
+  setInterval(updateClock, 1000);
   updateClock();
 }
 
-// --- CLOCK FUNCTION (Updated) ---
 function updateClock() {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
-  // Removed seconds to match the requested image style
   clockElement.textContent = `${hours}:${minutes}`;
 }
 
 // --- CORE FUNCTIONS ---
 function saveData() {
+  // Only saves to local storage; auto-sync to cloud is removed
   localStorage.setItem('checklist_tasks', JSON.stringify(AppData.tasks));
   localStorage.setItem('checklist_theme', JSON.stringify(AppData.isDarkMode));
   localStorage.setItem('checklist_cloud_url', AppData.cloudUrl);
   localStorage.setItem('checklist_clipboard', AppData.clipboard);
-
-  if (AppData.cloudUrl) {
-    showSyncStatus('syncing');
-    clearTimeout(window.syncTimeout);
-    window.syncTimeout = setTimeout(pushToCloud, 2000);
-  }
 }
 
-// Helper to save ONLY theme locally without triggering sync
 function saveThemeOnly() {
   localStorage.setItem('checklist_theme', JSON.stringify(AppData.isDarkMode));
 }
@@ -170,14 +153,25 @@ toggleModeBtn.addEventListener('click', () => {
   saveThemeOnly();
 });
 
-// Manual Sync (Pull)
-syncBtn.onclick = () => {
-  if (AppData.cloudUrl) {
-    pullFromCloud();
-  } else {
+// Manual Upload Handler
+uploadBtn.onclick = async () => {
+  if (!AppData.cloudUrl) {
     alert("Connect to Drive first!");
     cloudBtn.click();
+    return;
   }
+  showSyncStatus('syncing');
+  await pushToCloud();
+};
+
+// Manual Download Handler
+downloadBtn.onclick = async () => {
+  if (!AppData.cloudUrl) {
+    alert("Connect to Drive first!");
+    cloudBtn.click();
+    return;
+  }
+  await pullFromCloud();
 };
 
 // Clipboard Logic
@@ -194,12 +188,7 @@ copyClipboardBtn.onclick = () => {
   navigator.clipboard.writeText(text).then(() => {
     const originalText = copyClipboardBtn.textContent;
     copyClipboardBtn.textContent = 'Copied!';
-    setTimeout(() => {
-        copyClipboardBtn.textContent = originalText;
-    }, 1500);
-  }).catch(err => {
-    console.error('Failed to copy', err);
-    alert('Copy failed. Please copy manually.');
+    setTimeout(() => { copyClipboardBtn.textContent = originalText; }, 1500);
   });
 };
 
@@ -214,7 +203,7 @@ function applyTheme() {
   toggleModeBtn.textContent = AppData.isDarkMode ? '☀' : '🌙';
 }
 
-// --- CLOUD SYNC ---
+// --- CLOUD SYNC FUNCTIONS ---
 async function pushToCloud() {
   try {
     const payload = JSON.stringify({ 
@@ -223,15 +212,19 @@ async function pushToCloud() {
     });
     const res = await fetch(AppData.cloudUrl, { method: 'POST', body: payload });
     const result = await res.json();
-    if (result.status === 'success') showSyncStatus('success');
-    else throw new Error("Save Error");
+    if (result.status === 'success') {
+      showSyncStatus('success');
+      alert("Manual Upload Successful!");
+    } else {
+      throw new Error("Save Error");
+    }
   } catch (e) {
     showSyncStatus('error');
+    alert("Upload Failed.");
   }
 }
 
 async function pullFromCloud() {
-  if (!AppData.cloudUrl) return;
   showSyncStatus('syncing');
   try {
     const res = await fetch(AppData.cloudUrl);
@@ -242,18 +235,19 @@ async function pullFromCloud() {
         AppData.clipboard = data.clipboard;
         clipboardText.value = AppData.clipboard;
       }
-      applyTheme();
       renderTasks();
+      saveData();
       showSyncStatus('success');
+      alert("Manual Download Successful!");
     }
   } catch (e) {
     showSyncStatus('error');
+    alert("Download Failed.");
   }
 }
 
 function showSyncStatus(type) {
   statusPill.classList.add('show');
-  
   if (type === 'syncing') {
     statusDot.className = 'status-dot syncing';
     statusText.textContent = 'SYNCING...';
@@ -271,7 +265,6 @@ function showSyncStatus(type) {
   }
 }
 
-// --- MODAL ---
 cloudBtn.onclick = () => {
   cloudModal.classList.remove('hidden');
   document.getElementById('cloudUrlInput').value = AppData.cloudUrl;
