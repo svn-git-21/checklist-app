@@ -102,7 +102,7 @@ function renderTasks() {
     const deleteBtn = document.createElement('button');
     deleteBtn.innerHTML = '🗑️';
     deleteBtn.onclick = () => {
-      // Because IDs are now unique, this correctly removes only the selected item
+      // FIX: This filter now works correctly because every ID is guaranteed unique
       AppData.tasks = AppData.tasks.filter(t => t.id !== task.id);
       renderTasks();
       saveData();
@@ -116,10 +116,7 @@ function renderTasks() {
   });
 }
 
-/**
- * UPDATED: Uses a combination of Date.now() and a random string to ensure
- * that even if tasks are added in a loop, they have unique IDs.
- */
+// FIX: Added Math.random() to ensure IDs are unique even during rapid loops
 function addTask(text) {
   if (!text) return;
   const uniqueId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -135,13 +132,13 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
 });
 
 document.getElementById('addPredefinedBtn').addEventListener('click', () => {
-  const predefined = [
+  const items = [
     'Lenovo Office laptop', 'Office Laptop Charger', 'Mouse & Dongle', 
     'Airtel Router', 'Realme earbuds', 'Redmi Phone', 'Portronics Magclick', 
     'Lenskart Pouch', 'Diary & Pen', 'Wallet', 
     'Pouch - Headphone, Type B/C Cable', 'iPhone Charger', 'Office icard', 'Umbrella'
   ];
-  predefined.forEach(text => addTask(text));
+  items.forEach(text => addTask(text));
 });
 
 document.getElementById('completeAllBtn').addEventListener('click', () => {
