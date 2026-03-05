@@ -238,11 +238,18 @@ async function pullFromCloud() {
     const res = await fetch(AppData.cloudUrl);
     const data = await res.json();
     if (data.tasks) {
-      AppData.tasks = data.tasks;
+      // FIX: Sanitize incoming data by assigning unique IDs to every task
+      // This prevents the "multiple delete" issue even if the cloud data is "corrupt"
+      AppData.tasks = data.tasks.map(task => ({
+        ...task,
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+      }));
+
       if (data.clipboard !== undefined) {
         AppData.clipboard = data.clipboard;
         clipboardText.value = AppData.clipboard;
       }
+      
       renderTasks();
       saveData();
       showSyncStatus('success');
@@ -299,3 +306,4 @@ document.getElementById('disconnectBtn').onclick = () => {
 };
 
 init();
+
