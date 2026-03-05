@@ -44,7 +44,6 @@ function updateClock() {
 
 // --- CORE FUNCTIONS ---
 function saveData() {
-  // Only saves to local storage; auto-sync to cloud is removed
   localStorage.setItem('checklist_tasks', JSON.stringify(AppData.tasks));
   localStorage.setItem('checklist_theme', JSON.stringify(AppData.isDarkMode));
   localStorage.setItem('checklist_cloud_url', AppData.cloudUrl);
@@ -103,6 +102,7 @@ function renderTasks() {
     const deleteBtn = document.createElement('button');
     deleteBtn.innerHTML = '🗑️';
     deleteBtn.onclick = () => {
+      // Because IDs are now unique, this correctly removes only the selected item
       AppData.tasks = AppData.tasks.filter(t => t.id !== task.id);
       renderTasks();
       saveData();
@@ -116,9 +116,14 @@ function renderTasks() {
   });
 }
 
+/**
+ * UPDATED: Uses a combination of Date.now() and a random string to ensure
+ * that even if tasks are added in a loop, they have unique IDs.
+ */
 function addTask(text) {
   if (!text) return;
-  AppData.tasks.push({ id: Date.now(), text: text, completed: false });
+  const uniqueId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  AppData.tasks.push({ id: uniqueId, text: text, completed: false });
   renderTasks();
   saveData();
 }
@@ -130,7 +135,13 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
 });
 
 document.getElementById('addPredefinedBtn').addEventListener('click', () => {
-  ['Lenovo Office laptop', 'Office Laptop Charger', 'Mouse & Dongle', 'Airtel Router', 'Realme earbuds', 'Redmi Phone', 'Portronics Magclick', 'Lenskart Pouch', 'Diary & Pen', 'Wallet', 'Pouch - Headphone, Type B/C Cable', 'iPhone Charger', 'Office icard', 'Umbrella'].forEach(text => addTask(text));
+  const predefined = [
+    'Lenovo Office laptop', 'Office Laptop Charger', 'Mouse & Dongle', 
+    'Airtel Router', 'Realme earbuds', 'Redmi Phone', 'Portronics Magclick', 
+    'Lenskart Pouch', 'Diary & Pen', 'Wallet', 
+    'Pouch - Headphone, Type B/C Cable', 'iPhone Charger', 'Office icard', 'Umbrella'
+  ];
+  predefined.forEach(text => addTask(text));
 });
 
 document.getElementById('completeAllBtn').addEventListener('click', () => {
